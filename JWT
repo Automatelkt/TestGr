@@ -1,0 +1,55 @@
+package com.yourorganization.maven_sample;
+
+import io.jsonwebtoken.JwtBuilder;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import java.security.Key;
+import java.util.Date;
+import javax.crypto.spec.SecretKeySpec;
+import javax.xml.bind.DatatypeConverter;
+
+
+public class LogicNew {
+
+	
+		 public static void main(String[] args) {
+		    	String a = createJWT("Online Services", "www.coventrybuildingsociety.com", "testuser", "62389ca9-955c-4f5e-82a3-84fd91ad", 5000);
+		    	System.out.println(a);
+	}
+		 public static String createJWT(String issuer, String aud, String subject,String id, long ttlMillis) {
+	    	  
+		        //The JWT signature algorithm we will be using to sign the token
+		        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
+
+		       
+
+		        long nowMillis = System.currentTimeMillis();
+		        Date now = new Date(nowMillis);
+
+		        //We will sign our JWT with our ApiKey secret
+		        byte[] apiKeySecretBytes = DatatypeConverter.parseBase64Binary("test123");
+		        Key signingKey = new SecretKeySpec(apiKeySecretBytes, signatureAlgorithm.getJcaName());
+		       
+		        //Let's set the JWT Claims
+		        JwtBuilder builder = Jwts.builder()
+		        	    .setIssuer(issuer)
+		        		.setIssuedAt(now)
+		        		.setAudience(aud)
+		        		.setSubject(subject)
+		        		.setId(id)
+		        		.setHeaderParam("type","JWT")
+		        		.signWith(signatureAlgorithm, signingKey);
+		        
+		      
+		        //if it has been specified, let's add the expiration
+		        if (ttlMillis > 0) {
+		            long expMillis = nowMillis + ttlMillis;
+		            Date exp = new Date(expMillis);
+		            builder.setExpiration(exp);
+		        }  
+		      
+		        //Builds the JWT and serializes it to a compact, URL-safe string
+		        return builder.compact();
+		    }
+
+}
